@@ -1,45 +1,34 @@
-# XRecord — Android prototype
+# XRecord 2.1 — Android source project
 
-XRecord is an Expo + React Native Android project with a Kotlin native module prototype.
+XRecord captures the screen with Android MediaProjection, samples a small central grid, and shows a movable floating PLAY/PAUSE/STOP panel.
 
-## Included
-- XRecord interface and in-app test harness.
-- Android MediaProjection consent flow.
-- Foreground capture service that samples a small grid near the screen center.
-- Simple RGB frame-to-frame change detection.
-- Android notification and a compact floating status indicator.
-- GitHub Actions workflow to attempt a debug APK build.
+## Current behavior
+- Tap START in the app and accept Android screen-capture permission.
+- A floating panel appears in PAUSE.
+- PLAY starts central color-change detection.
+- PAUSE stops detection and disarms the accessibility tap action.
+- The first app opened after leaving XRecord while PLAY is active is locked as the target app until PAUSE.
+- On a detected change, XRecord requests one accessibility gesture at the configured X/Y pixel coordinates.
+- Events are sent back to the React Native UI.
 
-## Build from GitHub
-1. Upload the contents of this ZIP to the **root** of `sollunaeveritas-collab/XRECORD` on branch `main` (not the containing folder).
-2. Open the repository's **Actions** tab.
-3. Select **Build XRecord Android APK** and run it, or let the workflow run after the commit.
-4. When the run succeeds, open the run and download the `XRecord-debug-apk` artifact.
+## Required permissions
+1. Display over other apps.
+2. Screen capture consent each session.
+3. Accessibility service: enable XRecord in Android Settings > Accessibility.
 
-## Local build
-Requires Node.js 20, Java 17, Android SDK and Android Studio:
+Accessibility gestures are powerful. Only enable this for apps you own or are authorized to test. Android may restrict gestures, protected screens, or secure content. The tap point is in physical screen pixels and must be calibrated for the device.
+
+## Build
+Node.js 20 and Java 17:
 ```bash
 npm install
+npm run typecheck
 npx expo prebuild --platform android --no-install
 cd android
-./gradlew assembleDebug
+./gradlew assembleRelease
 ```
 
-## Android first run
-- Install the debug APK on an Android device.
-- Grant "Display over other apps" permission when prompted.
-- Start monitoring and accept Android's MediaProjection screen-capture confirmation.
-- Stop monitoring from the app to release the capture session.
+GitHub Actions builds the release APK and uploads `XRecord-2.1-release-apk`.
 
-## Important limitations
-- This is a source prototype, not a verified production APK. The GitHub Actions build must complete successfully and the app must be tested on a physical phone.
-- The detector uses a basic fixed RGB-difference threshold. The sensitivity and zone controls shown in the UI are not yet wired into native detection.
-- The floating indicator is a basic status pill, not yet draggable/resizable.
-- The app does **not** inject taps or automate input in third-party games/apps. Test button presses in the UI are simulated inside XRecord only.
-- Android version/vendor restrictions and permission flows vary. MediaProjection requires explicit user consent.
-- Captured frames are processed locally in memory; this prototype does not upload or save screenshots.
-
-## Repository layout
-- `App.tsx` — React Native UI and local test harness.
-- `modules/xrecord-native/` — Kotlin React Native module and capture foreground service.
-- `.github/workflows/android.yml` — debug APK build workflow.
+## Important
+This source has not been compiled or device-tested in this environment. It is a complete source project, not a verified APK. Verify the Android build and calibrate coordinates on a test device before relying on it. Screen pixels are processed locally and are not uploaded.
