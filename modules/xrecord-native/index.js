@@ -8,10 +8,14 @@ module.exports = {
   startMonitoring: () => Native.startMonitoring(),
   stopMonitoring: () => Native.stopMonitoring(),
   setTapPoint: (x, y) => Native.setTapPoint(x, y),
+  openPointPicker: () => Native.openPointPicker(),
   openAccessibilitySettings: () => Native.openAccessibilitySettings(),
   isAccessibilityEnabled: () => Native.isAccessibilityEnabled(),
   addDetectionListener: (callback) => emitter
     ? emitter.addListener("XRecordDetection", callback)
+    : { remove() {} },
+  addPointSelectedListener: (callback) => emitter
+    ? emitter.addListener("XRecordPointSelected", callback)
     : { remove() {} },
   isAvailable: Platform.OS === "android" && !!Native,
 };
