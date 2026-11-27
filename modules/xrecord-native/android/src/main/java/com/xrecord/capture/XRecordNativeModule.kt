@@ -63,7 +63,7 @@ class XRecordNativeModule(
     @ReactMethod
     fun startMonitoring(p: Promise) {
 
-        val activity = currentActivity
+        val activity = ctx.currentActivity
 
         if (activity == null) {
             p.reject("NO_ACTIVITY", "Activity unavailable")
