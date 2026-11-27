@@ -32,8 +32,11 @@ class XRecordAccessibilityService : AccessibilityService() {
         fun arm() { armed = true; targetPackage = null }
         fun disarm() { armed = false; targetPackage = null }
         fun tap(x: Int, y: Int): Boolean {
+            // Send a coordinate gesture whenever PLAY is armed.
+            // The target does not need to expose an Android button or clickable node:
+            // Android receives a touch gesture at the selected screen coordinate.
             val service = instance ?: return false
-            if (!armed || targetPackage.isNullOrBlank()) return false
+            if (!armed) return false
             return service.dispatchTap(x.toFloat(), y.toFloat())
         }
         fun showPointPicker(): Boolean = instance?.showPicker() ?: false
