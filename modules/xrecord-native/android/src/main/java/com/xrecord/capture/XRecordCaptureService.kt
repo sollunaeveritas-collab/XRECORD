@@ -48,6 +48,9 @@ class XRecordCaptureService : Service() {
     @Volatile private var playing = false
     private var count = 0
     private var sensitivity = 10
+    private var tapX = 540
+    private var tapY = 1200
+    private var tapDelayMs = 0
 
     private val loop = object : Runnable {
         override fun run() {
@@ -93,6 +96,9 @@ class XRecordCaptureService : Service() {
             density = m.densityDpi
             val prefs = getSharedPreferences("xrecord", Context.MODE_PRIVATE)
             sensitivity = prefs.getInt("sensitivity", 10).coerceIn(1, 60)
+            tapX = prefs.getInt("tap_x", screenW / 2).coerceIn(0, screenW - 1)
+            tapY = prefs.getInt("tap_y", (screenH * 2 / 3)).coerceIn(0, screenH - 1)
+            tapDelayMs = prefs.getInt("tap_delay_ms", 0).coerceIn(0, 2000)
             val manager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as android.media.projection.MediaProjectionManager
             projection = manager.getMediaProjection(code, data)
             projection?.registerCallback(object : MediaProjection.Callback() {
@@ -206,13 +212,23 @@ class XRecordCaptureService : Service() {
                         lastDetection=System.currentTimeMillis()
                         count++
                         val latencyMs = (SystemClock.elapsedRealtime() - sampleStarted).toInt()
+                        val prefsNow = getSharedPreferences("xrecord", Context.MODE_PRIVATE)
+                        tapX = prefsNow.getInt("tap_x", screenW / 2).coerceIn(0, screenW - 1)
+                        tapY = prefsNow.getInt("tap_y", screenH * 2 / 3).coerceIn(0, screenH - 1)
+                        tapDelayMs = prefsNow.getInt("tap_delay_ms", 0).coerceIn(0, 2000)
+                        val detectedAt = SystemClock.elapsedRealtime()
+                        val performTap = Runnable {
+                            val sent = XRecordAccessibilityService.tap(tapX, tapY)
+                            val totalMs = (SystemClock.elapsedRealtime() - detectedAt).toInt() + latencyMs
+                            sendBroadcast(Intent(ACTION_DETECTED).setPackage(packageName)
+                                .putExtra("timestamp", System.currentTimeMillis())
+                                .putExtra("difference", avg)
+                                .putExtra("count", count)
+                                .putExtra("tapSent", sent)
+                                .putExtra("latencyMs", totalMs))
+                        }
+                        if (tapDelayMs > 0) handler?.postDelayed(performTap, tapDelayMs) else performTap.run()
                         status?.text = "XRECORD • #$count"
-                        sendBroadcast(Intent(ACTION_DETECTED).setPackage(packageName)
-                            .putExtra("timestamp", System.currentTimeMillis())
-                            .putExtra("difference", avg)
-                            .putExtra("count", count)
-                            .putExtra("tapSent", false)
-                            .putExtra("latencyMs", latencyMs))
                         getSystemService(NotificationManager::class.java)
                             .notify(NOTIFICATION_ID, notification("Изменение #$count • Δ $avg"))
                         handler?.postDelayed({

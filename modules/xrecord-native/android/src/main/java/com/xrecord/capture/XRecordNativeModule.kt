@@ -102,6 +102,14 @@ class XRecordNativeModule(private val ctx: ReactApplicationContext) :
 
 
     @ReactMethod
+    fun setTapDelay(value: Int, p: Promise) {
+        val safeValue = value.coerceIn(0, 2000)
+        ctx.getSharedPreferences("xrecord", Context.MODE_PRIVATE)
+            .edit().putInt("tap_delay_ms", safeValue).apply()
+        p.resolve(safeValue)
+    }
+
+    @ReactMethod
     fun setSensitivity(value: Int, p: Promise) {
         val safeValue = value.coerceIn(1, 60)
         ctx.getSharedPreferences("xrecord", Context.MODE_PRIVATE)
