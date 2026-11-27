@@ -227,7 +227,7 @@ class XRecordCaptureService : Service() {
                                 .putExtra("tapSent", sent)
                                 .putExtra("latencyMs", totalMs))
                         }
-                        if (tapDelayMs > 0) handler?.postDelayed(performTap, tapDelayMs) else performTap.run()
+                        if (tapDelayMs > 0) handler?.postDelayed(performTap, tapDelayMs.toLong()) else performTap.run()
                         status?.text = "XRECORD • #$count"
                         getSystemService(NotificationManager::class.java)
                             .notify(NOTIFICATION_ID, notification("Изменение #$count • Δ $avg"))
