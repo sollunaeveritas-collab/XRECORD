@@ -36,3 +36,30 @@ This source has not been compiled or device-tested in this environment. It is a 
 
 ## Выбор точки на экране (2.2)
 В приложении нажмите «Выбрать кнопку на экране». Появится затемнённый экран с красным прицелом. Переместите прицел пальцем на нужную кнопку и нажмите «СОХРАНИТЬ». Координаты сохраняются в локальных настройках Android и отображаются в полях X/Y. Для этого должна быть включена служба специальных возможностей XRecord.
+
+
+## XRecord 2.3 change
+
+- PLAY now sends a coordinate tap whenever the AccessibilityService is connected and armed.
+- It no longer refuses the tap just because no target package/window event was observed.
+- The tap is a raw coordinate gesture; it does not require a visible Android button or clickable accessibility node.
+- Test only in apps you own or are authorized to test. Android/app security can still reject or intercept gestures.
+
+
+## XRecord 2.4
+
+- Monitor-only build: automatic tapping is disabled.
+- Adjustable color-difference threshold (1–60), default 10.
+- Frame sampling interval reduced to 70 ms; event debounce is 250 ms.
+- Displays frame-processing time for each detection.
+- Screen capture and overlay remain subject to Android permissions.
+
+
+## XRecord 2.5
+
+- Restores coordinate-based automatic touch after a detected screen change.
+- Uses the saved X/Y point; the point need not correspond to an Android clickable node.
+- Adds configurable tap delay (0–2000 ms; default 0).
+- Keeps sensitivity control and frame processing diagnostics from 2.4.
+- Requires the XRecord AccessibilityService to be enabled; `tapSent` reports dispatch acceptance, not guaranteed app response.
+- Intended for testing apps/games you own or are authorized to test.

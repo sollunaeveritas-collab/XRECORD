@@ -10,6 +10,9 @@ export default function App() {
   const [sensitivity, setSensitivity] = useState("10");
   const [latency, setLatency] = useState<number | null>(null);
   const [overlay, setOverlay] = useState(false);
+  const [coordX, setCoordX] = useState("540");
+  const [coordY, setCoordY] = useState("1200");
+  const [tapDelay, setTapDelay] = useState("0");
 
   const refreshPermissions = async () => {
     try { setOverlay(await XRecordNative.isOverlayAllowed()); } catch {}
@@ -20,7 +23,7 @@ export default function App() {
     const sub = XRecordNative.addDetectionListener((event: any) => {
       setHits(typeof event.count === "number" ? event.count : v => v + 1);
       setLatency(typeof event.latencyMs === "number" ? event.latencyMs : null);
-      setLast(`Изменение обнаружено • Δ ${event.difference} • проверка ${event.latencyMs ?? "—"} мс`);
+      setLast(`Изменение • Δ ${event.difference} • ${event.tapSent ? "нажатие отправлено" : "нажатие не отправлено"} • ${event.latencyMs ?? "—"} мс`);
     });
     return () => sub.remove();
   }, []);
@@ -92,13 +95,32 @@ export default function App() {
           <Text style={s.note}>Рекомендуется начать с 8–12. Значение 1 максимально чувствительное и может реагировать на шум изображения.</Text>
         </View>
 
+        <Text style={s.section}>АВТОМАТИЧЕСКОЕ НАЖАТИЕ</Text>
+        <View style={s.card}>
+          <Text style={s.description}>При обнаружении изменения XRecord отправляет касание по указанным координатам. Точка может находиться на пустом участке экрана.</Text>
+          <View style={s.coordRow}>
+            <View style={s.coord}><Text style={s.label}>X</Text><TextInput value={coordX} onChangeText={v=>setCoordX(v.replace(/[^0-9]/g,""))} keyboardType="numeric" style={s.input}/></View>
+            <View style={s.coord}><Text style={s.label}>Y</Text><TextInput value={coordY} onChangeText={v=>setCoordY(v.replace(/[^0-9]/g,""))} keyboardType="numeric" style={s.input}/></View>
+          </View>
+          <View style={s.coordRow}>
+            <View style={s.coord}><Text style={s.label}>Задержка перед нажатием (мс)</Text><TextInput value={tapDelay} onChangeText={v=>setTapDelay(v.replace(/[^0-9]/g,"").slice(0,4))} keyboardType="numeric" style={s.input}/></View>
+            <TouchableOpacity style={s.apply} onPress={async()=>{const x=Math.max(0,Number.parseInt(coordX,10)||0),y=Math.max(0,Number.parseInt(coordY,10)||0),d=Math.max(0,Math.min(2000,Number.parseInt(tapDelay,10)||0));await XRecordNative.setTapPoint(x,y);await XRecordNative.setTapDelay(d);setCoordX(String(x));setCoordY(String(y));setTapDelay(String(d));setLast(`Точка сохранена: X ${x}, Y ${y}`);}}>
+              <Text style={s.secondaryText}>СОХРАНИТЬ</Text>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={s.secondary} onPress={async()=>{try{await XRecordNative.openPointPicker();}catch(e:any){Alert.alert("Выбор точки",e?.message||"Включите специальные возможности XRecord");}}}>
+            <Text style={s.secondaryText}>ВЫБРАТЬ ТОЧКУ НА ЭКРАНЕ</Text>
+          </TouchableOpacity>
+          <Text style={s.note}>Для тестирования собственных приложений. Android может ограничивать жесты на отдельных системных или защищённых экранах.</Text>
+        </View>
+
         <Text style={s.section}>СТАТИСТИКА</Text>
         <View style={s.stats}>
           <View style={s.stat}><Text style={s.statNum}>{hits}</Text><Text style={s.statLabel}>ОБНАРУЖЕНИЙ</Text></View>
           <View style={s.stat}><Text style={s.statNum}>{latency === null ? "—" : `${latency} мс`}</Text><Text style={s.statLabel}>ВРЕМЯ ОБРАБОТКИ</Text></View>
         </View>
         <View style={s.card}><Text style={s.label}>Последнее событие</Text><Text style={s.last}>{last}</Text></View>
-        <Text style={s.footer}>XRECORD 2.4 • Локальный мониторинг • Без автоматических нажатий</Text>
+        <Text style={s.footer}>XRECORD 2.5 • Локальный мониторинг • Без автоматических нажатий</Text>
       </ScrollView>
     </SafeAreaView>
   );
