@@ -19,6 +19,15 @@ class XRecordNativeModule(private val ctx: ReactApplicationContext) :
     private var pending: Promise? = null
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == XRecordAccessibilityService.ACTION_POINT_SELECTED) {
+                val point = Arguments.createMap().apply {
+                    putInt("x", intent.getIntExtra("x", 0))
+                    putInt("y", intent.getIntExtra("y", 0))
+                }
+                ctx.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+                    .emit("XRecordPointSelected", point)
+                return
+            }
             if (intent?.action != XRecordCaptureService.ACTION_DETECTED) return
             val map = Arguments.createMap().apply {
                 putDouble("timestamp", intent.getLongExtra("timestamp", 0L).toDouble())
@@ -33,7 +42,10 @@ class XRecordNativeModule(private val ctx: ReactApplicationContext) :
 
     init {
         ctx.addActivityEventListener(this)
-        val filter = IntentFilter(XRecordCaptureService.ACTION_DETECTED)
+        val filter = IntentFilter().apply {
+            addAction(XRecordCaptureService.ACTION_DETECTED)
+            addAction(XRecordAccessibilityService.ACTION_POINT_SELECTED)
+        }
         if (Build.VERSION.SDK_INT >= 33) {
             ctx.registerReceiver(receiver, filter, Context.RECEIVER_NOT_EXPORTED)
         } else {
@@ -85,6 +97,12 @@ class XRecordNativeModule(private val ctx: ReactApplicationContext) :
         val prefs = ctx.getSharedPreferences("xrecord", Context.MODE_PRIVATE)
         prefs.edit().putInt("tap_x", x.toInt()).putInt("tap_y", y.toInt()).apply()
         p.resolve(true)
+    }
+
+    @ReactMethod
+    fun openPointPicker(p: Promise) {
+        val opened = XRecordAccessibilityService.showPointPicker()
+        if (opened) p.resolve(true) else p.reject("ACCESSIBILITY_UNAVAILABLE", "Включите XRecord в специальных возможностях Android")
     }
 
     @ReactMethod
