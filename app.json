@@ -15,6 +15,5 @@
         "VIBRATE"
       ]
     },
-    "plugins": ["expo-dev-client"]
   }
 }
