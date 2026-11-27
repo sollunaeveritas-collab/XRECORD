@@ -8,29 +8,37 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - name: Install dependencies
         run: npm install
-      - name: Generate native Android project
+
+      - name: Generate Android project
         run: npx expo prebuild --platform android --no-install
-      - name: Set up Java
+
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-      - name: Build debug APK
+
+      - name: Build Release APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: XRecord-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: XRecord-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
