@@ -1,1 +1,1 @@
-
+const {NativeModules,Platform}=require("react-native");\nconst Native=NativeModules.XRecordNative;\nmodule.exports={requestOverlayPermission:()=>Native.requestOverlayPermission(),startMonitoring:()=>Native.startMonitoring(),stopMonitoring:()=>Native.stopMonitoring(),isOverlayAllowed:()=>Native.isOverlayAllowed(),isAvailable:Platform.OS==="android"&&!!Native};
