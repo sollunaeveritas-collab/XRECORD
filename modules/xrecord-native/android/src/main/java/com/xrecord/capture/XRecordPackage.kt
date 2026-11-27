@@ -6,7 +6,8 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
 class XRecordPackage : ReactPackage {
- override fun createNativeModules(c: ReactApplicationContext): List<NativeModule> =
-   listOf(XRecordNativeModule(c))
- override fun createViewManagers(c: ReactApplicationContext): List<ViewManager<*, *>> = emptyList()
+    override fun createNativeModules(c: ReactApplicationContext): List<NativeModule> =
+        listOf(XRecordNativeModule(c))
+    override fun createViewManagers(c: ReactApplicationContext): List<ViewManager<*, *>> =
+        emptyList()
 }
