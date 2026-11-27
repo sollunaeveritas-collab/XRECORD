@@ -33,7 +33,8 @@ class XRecordNativeModule(private val ctx: ReactApplicationContext) :
                 putDouble("timestamp", intent.getLongExtra("timestamp", 0L).toDouble())
                 putInt("difference", intent.getIntExtra("difference", 0))
                 putInt("count", intent.getIntExtra("count", 0))
-                putBoolean("tapSent", intent.getBooleanExtra("tapSent", false))
+                putBoolean("tapSent", false)
+                putInt("latencyMs", intent.getIntExtra("latencyMs", 0))
             }
             ctx.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
                 .emit("XRecordDetection", map)
@@ -97,6 +98,15 @@ class XRecordNativeModule(private val ctx: ReactApplicationContext) :
         val prefs = ctx.getSharedPreferences("xrecord", Context.MODE_PRIVATE)
         prefs.edit().putInt("tap_x", x.toInt()).putInt("tap_y", y.toInt()).apply()
         p.resolve(true)
+    }
+
+
+    @ReactMethod
+    fun setSensitivity(value: Int, p: Promise) {
+        val safeValue = value.coerceIn(1, 60)
+        ctx.getSharedPreferences("xrecord", Context.MODE_PRIVATE)
+            .edit().putInt("sensitivity", safeValue).apply()
+        p.resolve(safeValue)
     }
 
     @ReactMethod

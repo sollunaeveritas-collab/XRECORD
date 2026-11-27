@@ -19,6 +19,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlin.math.abs
+import android.os.SystemClock
 
 class XRecordCaptureService : Service() {
     companion object {
@@ -46,13 +47,12 @@ class XRecordCaptureService : Service() {
     private var density = 1
     @Volatile private var playing = false
     private var count = 0
-    private var tapX = 0
-    private var tapY = 0
+    private var sensitivity = 10
 
     private val loop = object : Runnable {
         override fun run() {
             if (playing) sampleFrame()
-            handler?.postDelayed(this, 100)
+            handler?.postDelayed(this, 70)
         }
     }
 
@@ -92,8 +92,7 @@ class XRecordCaptureService : Service() {
             screenH = m.heightPixels
             density = m.densityDpi
             val prefs = getSharedPreferences("xrecord", Context.MODE_PRIVATE)
-            tapX = prefs.getInt("tap_x", screenW / 2)
-            tapY = prefs.getInt("tap_y", screenH / 2)
+            sensitivity = prefs.getInt("sensitivity", 10).coerceIn(1, 60)
             val manager = getSystemService(Context.MEDIA_PROJECTION_SERVICE) as android.media.projection.MediaProjectionManager
             projection = manager.getMediaProjection(code, data)
             projection?.registerCallback(object : MediaProjection.Callback() {
@@ -168,6 +167,7 @@ class XRecordCaptureService : Service() {
     }
 
     private fun sampleFrame() {
+        val sampleStarted = SystemClock.elapsedRealtime()
         val image: Image = reader?.acquireLatestImage() ?: return
         try {
             val plane = image.planes[0]
@@ -200,18 +200,21 @@ class XRecordCaptureService : Service() {
                             abs((a and 255)-(b and 255))
                     }
                     val avg = (diff / (points.size*3)).toInt()
-                    if (avg > 24 && System.currentTimeMillis()-lastDetection > 900) {
+                    val prefs = getSharedPreferences("xrecord", Context.MODE_PRIVATE)
+                    sensitivity = prefs.getInt("sensitivity", sensitivity).coerceIn(1, 60)
+                    if (avg >= sensitivity && System.currentTimeMillis()-lastDetection > 250) {
                         lastDetection=System.currentTimeMillis()
                         count++
-                        val tapSent = XRecordAccessibilityService.tap(tapX, tapY)
+                        val latencyMs = (SystemClock.elapsedRealtime() - sampleStarted).toInt()
                         status?.text = "XRECORD • #$count"
                         sendBroadcast(Intent(ACTION_DETECTED).setPackage(packageName)
                             .putExtra("timestamp", System.currentTimeMillis())
                             .putExtra("difference", avg)
                             .putExtra("count", count)
-                            .putExtra("tapSent", tapSent))
+                            .putExtra("tapSent", false)
+                            .putExtra("latencyMs", latencyMs))
                         getSystemService(NotificationManager::class.java)
-                            .notify(NOTIFICATION_ID, notification("Изменение #$count" + if (tapSent) " • tap" else ""))
+                            .notify(NOTIFICATION_ID, notification("Изменение #$count • Δ $avg"))
                         handler?.postDelayed({
                             status?.text = if (playing) "XRECORD • PLAY" else "XRECORD • PAUSE"
                         }, 700)
