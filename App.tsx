@@ -25,7 +25,12 @@ export default function App() {
       setHits(typeof event.count === "number" ? event.count : (v => v + 1));
       setLast(`Изменение обнаружено • Δ ${event.difference} • ${event.tapSent ? "нажатие отправлено" : "нажатие не выполнено — проверьте Accessibility и координаты"}`);
     });
-    return () => sub.remove();
+    const pointSub = XRecordNative.addPointSelectedListener((point: any) => {
+      setX(String(point.x));
+      setY(String(point.y));
+      setLast(`Точка нажатия сохранена • X: ${point.x}, Y: ${point.y}`);
+    });
+    return () => { sub.remove(); pointSub.remove(); };
   }, []);
 
   const start = async () => {
@@ -91,6 +96,16 @@ export default function App() {
         <Text style={s.section}>КООРДИНАТЫ ТЕСТОВОГО НАЖАТИЯ</Text>
         <View style={s.card}>
           <Text style={s.description}>Укажите координаты кнопки на экране в физических пикселях (X слева направо, Y сверху вниз). Начальное значение нужно подобрать под разрешение устройства.</Text>
+          <TouchableOpacity style={s.pickButton} onPress={async () => {
+            try {
+              await XRecordNative.openPointPicker();
+              setLast("Переместите красный прицел на нужную кнопку и нажмите СОХРАНИТЬ.");
+            } catch (e: any) {
+              Alert.alert("Не удалось открыть выбор точки", e?.message || "Проверьте разрешение специальных возможностей.");
+            }
+          }}>
+            <Text style={s.pickButtonText}>⌖  ВЫБРАТЬ КНОПКУ НА ЭКРАНЕ</Text>
+          </TouchableOpacity>
           <View style={s.coordRow}>
             <View style={s.coord}><Text style={s.label}>X</Text><TextInput value={x} onChangeText={setX} keyboardType="numeric" style={s.input}/></View>
             <View style={s.coord}><Text style={s.label}>Y</Text><TextInput value={y} onChangeText={setY} keyboardType="numeric" style={s.input}/></View>
@@ -104,7 +119,7 @@ export default function App() {
           <View style={s.stat}><Text style={s.statNum}>{started?"ON":"OFF"}</Text><Text style={s.statLabel}>СЕССИЯ</Text></View>
         </View>
         <View style={s.card}><Text style={s.label}>Последнее событие</Text><Text style={s.last}>{last}</Text></View>
-        <Text style={s.footer}>XRECORD 2.1 • Обработка изображения локально на устройстве</Text>
+        <Text style={s.footer}>XRECORD 2.2 • Обработка изображения локально на устройстве</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -125,6 +140,8 @@ const s=StyleSheet.create({
  permissionRow:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",paddingVertical:7},
  label:{fontSize:12,color:"#F0F3F7",fontWeight:"700"},badge:{fontSize:9,fontWeight:"900"},
  secondary:{backgroundColor:"#293241",padding:13,borderRadius:10,alignItems:"center",marginTop:10},
+ pickButton:{backgroundColor:"#E84950",padding:15,borderRadius:11,alignItems:"center",marginTop:15},
+ pickButtonText:{color:"#fff",fontSize:11,fontWeight:"900",letterSpacing:.5},
  secondaryText:{color:"#F2F4F7",fontSize:10,fontWeight:"900",letterSpacing:.6},
  textButton:{alignItems:"center",padding:10,marginTop:3},textButtonText:{color:"#9DAABD",fontSize:11},
  coordRow:{flexDirection:"row",gap:12,marginTop:14},coord:{flex:1},

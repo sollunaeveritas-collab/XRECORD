@@ -2,7 +2,7 @@
   "expo": {
     "name": "XRecord",
     "slug": "xrecord",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "android": {

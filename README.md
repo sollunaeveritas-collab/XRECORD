@@ -1,4 +1,4 @@
-# XRecord 2.1 — Android source project
+# XRecord 2.2 — Android source project
 
 XRecord captures the screen with Android MediaProjection, samples a small central grid, and shows a movable floating PLAY/PAUSE/STOP panel.
 
@@ -28,7 +28,11 @@ cd android
 ./gradlew assembleRelease
 ```
 
-GitHub Actions builds the release APK and uploads `XRecord-2.1-release-apk`.
+GitHub Actions builds the release APK and uploads `XRecord-2.2-release-apk`.
 
 ## Important
 This source has not been compiled or device-tested in this environment. It is a complete source project, not a verified APK. Verify the Android build and calibrate coordinates on a test device before relying on it. Screen pixels are processed locally and are not uploaded.
+
+
+## Выбор точки на экране (2.2)
+В приложении нажмите «Выбрать кнопку на экране». Появится затемнённый экран с красным прицелом. Переместите прицел пальцем на нужную кнопку и нажмите «СОХРАНИТЬ». Координаты сохраняются в локальных настройках Android и отображаются в полях X/Y. Для этого должна быть включена служба специальных возможностей XRecord.
