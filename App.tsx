@@ -120,7 +120,7 @@ export default function App() {
           <View style={s.stat}><Text style={s.statNum}>{latency === null ? "—" : `${latency} мс`}</Text><Text style={s.statLabel}>ВРЕМЯ ОБРАБОТКИ</Text></View>
         </View>
         <View style={s.card}><Text style={s.label}>Последнее событие</Text><Text style={s.last}>{last}</Text></View>
-        <Text style={s.footer}>XRECORD 2.5 • Локальный мониторинг • Без автоматических нажатий</Text>
+        <Text style={s.footer}>XRECORD 2.5.1 • Локальный мониторинг • Без автоматических нажатий</Text>
       </ScrollView>
     </SafeAreaView>
   );
