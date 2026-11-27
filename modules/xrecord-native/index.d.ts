@@ -1,4 +1,4 @@
-export type DetectionEvent = { timestamp: number; difference: number; count: number; tapSent: false; latencyMs: number };
+export type DetectionEvent = { timestamp: number; difference: number; count: number; tapSent: boolean; latencyMs: number };
 export type PointSelectedEvent = { x: number; y: number };
 declare const XRecordNative: {
   requestOverlayPermission(): Promise<boolean>;
@@ -7,6 +7,7 @@ declare const XRecordNative: {
   stopMonitoring(): Promise<boolean>;
   setTapPoint(x: number, y: number): Promise<boolean>;
   setSensitivity(value: number): Promise<number>;
+  setTapDelay(value: number): Promise<number>;
   openPointPicker(): Promise<boolean>;
   openAccessibilitySettings(): Promise<boolean>;
   isAccessibilityEnabled(): Promise<boolean>;

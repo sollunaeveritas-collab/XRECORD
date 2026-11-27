@@ -9,6 +9,7 @@ module.exports = {
   stopMonitoring: () => Native.stopMonitoring(),
   setTapPoint: (x, y) => Native.setTapPoint(x, y),
   setSensitivity: (value) => Native.setSensitivity(value),
+  setTapDelay: (value) => Native.setTapDelay(value),
   openPointPicker: () => Native.openPointPicker(),
   openAccessibilitySettings: () => Native.openAccessibilitySettings(),
   isAccessibilityEnabled: () => Native.isAccessibilityEnabled(),
