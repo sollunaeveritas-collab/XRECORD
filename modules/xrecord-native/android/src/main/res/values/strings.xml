@@ -1,1 +1,3 @@
-
+<resources>
+    <string name="xrecord_accessibility_description">Разрешение для выполнения тестового нажатия в выбранном приложении при обнаружении изменения изображения.</string>
+</resources>
