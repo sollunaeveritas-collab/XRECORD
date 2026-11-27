@@ -39,7 +39,7 @@ class XRecordNativeModule(
             return
         }
 
-        val activity = currentActivity
+        val activity = ctx.currentActivity
 
         if (activity == null) {
             p.reject("NO_ACTIVITY", "Activity unavailable")
